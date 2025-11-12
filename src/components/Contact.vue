@@ -37,7 +37,7 @@
 
 <script setup>
     
-    import { ref, onMounted, onBeforemount } from 'vue';
+    import { ref, onMounted, onBeforeUnmount } from 'vue';
     import { Notyf } from 'notyf';
     import 'notyf/notyf.min.css';
 
@@ -115,7 +115,7 @@
             console.error('recaptcha not loaded');
             return;
         }
-        recaptchaWidgetId.value = window.grecaptcha.render(recaptcha.value, {
+        recaptchaWidgetId.value = window.grecaptcha.render(recaptchaContainer.value, {
             sitekey: SITE_KEY,
             size: 'normal',
             callback: onRecaptchaSuccess,
@@ -138,7 +138,7 @@
             }
         }, 100);
 
-        onBeforemount(() => {
+        onBeforeUnmount(() => {
             clearInterval(interval)
         })
     });
