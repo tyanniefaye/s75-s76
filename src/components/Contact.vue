@@ -34,7 +34,7 @@
 
 <script setup>
     
-    import { ref } from 'vue';
+    import { ref, onMounted, onBeforemount } from 'vue';
     import { Notyf } from 'notyf';
     import 'notyf/notyf.min.css';
 
@@ -52,6 +52,12 @@
 
 
     const submitForm = async() => {
+
+        if(!recaptchaToken.value){
+            notyf.error("Please verify that you are not a robot.");
+            return;
+        }
+
         isLoading.value = true;
 
         try {
@@ -81,7 +87,57 @@
             console.log(error);
             isLoading.value = false;
             notyf.error("Failed to send message");
+        } finally {
+            restRecaptcha();
         }
     }
+
+
+    const SITE_KEY = '6Lds7gksAAAAAFQh0WxWmwWH3Dypkf50IbWr2hvS'
+
+    const recaptchaContainer = ref(null);
+    const recaptchaWidgetId = ref(null);
+    const recaptchaToken = ref(null);
+
+    function onRecaptchaSuccess(token){
+        recaptchaToken.value = token;
+    }
+
+    function onRecaptchaExpired(){
+        recaptchaToken.value = '';
+    }
+
+    function renderRecaptcha(){
+        if(!window.grecaptcha){
+            console.error('recaptcha not loaded');
+            return;
+        }
+        recaptchaWidgetId.value = window.grecaptcha.render(recaptcha.value, {
+            sitekey: SITE_KEY,
+            size: 'normal',
+            callback: onRecaptchaSuccess,
+            'expired-callback': onRecaptchaExpired
+        });
+    }
+
+    function resetRecaptcha(){
+        if(recaptchaWidgetId.value !==null){
+            window.grecaptcha.reset(recaptchaWidgetId.value);
+            recaptchaToken.value = '';
+        }
+    }
+
+    onMounted(() => {
+        const interval = setInterval(() => {
+            if(window.grecaptcha && window.grecaptcha.render){
+                renderRecaptcha();
+                clearInterval(interval)
+            }
+        }, 100);
+
+        onBeforemount(() => {
+            clearInterval(interval)
+        })
+    });
 
 </script>
