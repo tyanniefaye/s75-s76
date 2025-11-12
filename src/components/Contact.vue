@@ -91,7 +91,7 @@
             isLoading.value = false;
             notyf.error("Failed to send message");
         } finally {
-            restRecaptcha();
+            resetRecaptcha();
         }
     }
 
@@ -100,7 +100,7 @@
 
     const recaptchaContainer = ref(null);
     const recaptchaWidgetId = ref(null);
-    const recaptchaToken = ref(null);
+    const recaptchaToken = ref('');
 
     function onRecaptchaSuccess(token){
         recaptchaToken.value = token;
